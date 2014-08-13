@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-                                                          
 
 '''                                                                             
-author: PauMB                                                                   
+Author: PauMB                                                                   
 Program: Motion sensor, if it detec moves in the room, the firts time send      
          an email, the 20th send sms with Carriots plataform                    
 Date: 08/09/14                                                                  
@@ -94,7 +94,7 @@ def sendStream():
     ''' send a stream from carriots plataform and send you a sms'''
 
     data = {"protocol": "v2", "device": device, "at": timestamp, "data": dict(
-            motionSend=("ON" if lastStatus is 0 is on else "OFF"))}
+            motionSend=("ON" if lastStatus is 0 on else "OFF"))}
     carriots_response = client_carriots.send(data)
     print carriots_response.read()
     
