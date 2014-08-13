@@ -18,7 +18,13 @@ import signal
 
 #values                                                                         
 lastStatus = 1   #inicilize in 0, (0 no move, 1 move)                           
-n_Moves = -1     #number the moves detected                                     
+n_Moves = -1     #number the moves detected     
+
+#data mail                                                                                              
+From = 'paumb85@gmail.com'
+To = 'paumb85@gmail.com'
+Subject = 'Prueba Mail'
+Text = 'Contenido del mail a enviar'
 
 #names of gpio                                                                  
 motion = 17
@@ -59,16 +65,16 @@ def tiempo(tiempoCapturado):
     minute = tiempoCapturado[4]
     return hour,minute
 
-def envioMail(hora,minuto):
+def envioMail(sendFrom,sendTo,sendSubject,sendText,hora,minuto):
     '''Funcion que envia un mail'''
 
     # Creamos el mensaje                                                                           
-    msg = MIMEText("Se ha detectado movimiento en la habitacion")
+    msg = MIMEText(sendText)
 
     # Conexión con el server                                                                       
-    msg['Subject'] = 'Prueba de mail con python y motion sensor desde Raspberry Pi'
-    msg['From'] = 'YourMail@gmail.com'
-    msg['To'] = 'To Mail'
+    msg['Subject'] = sendSubject
+    msg['From'] = sendFrom
+    msg['To'] = sendTo
 
     # Autenticamos                                                                                 
     mailServer = smtplib.SMTP('smtp.gmail.com',587)
@@ -77,7 +83,7 @@ def envioMail(hora,minuto):
     mailServer.ehlo()
     mailServer.login("YourMail@gmail.com","password")
     # Enviamos 'from' 'to'                                                                         
-    mailServer.sendmail("from@gmail.com", "to@gmail.com", msg.as_string())
+    mailServer.sendmail(sendFrom, sendTo, msg.as_string())
     # Cerramos conexión                                                                            
     mailServer.close()
     
@@ -101,7 +107,7 @@ def main():
                 t_CapturaSeg = time.time()
                 t_Captura = time.localtime(t_CapturaSeg)
                 hour, minute = tiempo(t_Captura)
-		            envioMail(hour,minute)
+		envioMail(From,To,Subject,Text,hour,minute)
                 print "Send Mail"
             elif n_Moves%17 == 0 :
                 #PREPARAR PARA ENVIAR UN SMS CON CARRIOTS                                
