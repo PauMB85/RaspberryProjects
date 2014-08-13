@@ -69,7 +69,7 @@ def tiempo(tiempoCapturado):
     return hour,minute
 
 def envioMail(sendFrom,sendTo,sendSubject,sendText,hora,minuto):
-    '''send a mail'''
+    '''Send a mail'''
 
     #Body missage                                                                           
     msg = MIMEText(sendText)
@@ -91,7 +91,7 @@ def envioMail(sendFrom,sendTo,sendSubject,sendText,hora,minuto):
     mailServer.close()
     
 def sendStream():
-    ''' send a stream from carriots plataform and send you a sms'''
+    ''' Send a stream from carriots plataform and send you a sms'''
 
     data = {"protocol": "v2", "device": device, "at": timestamp, "data": dict(
             motionSend=("ON" if lastStatus is 0 on else "OFF"))}
