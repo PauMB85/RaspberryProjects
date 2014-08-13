@@ -27,28 +27,30 @@ Subject = 'Prueba Mail'
 Text = 'Contenido del mail a enviar'
 
 #names of gpio                                                                  
-motion = 17
-ledGreen = 23
-ledRed = 24
+motion = 17		 #GPIO 17                                                                                
+ledGreen = 23            #GPIO 23                                                                                
+ledRed = 24              #GPIO 24
 
 def signal_handler(signal,frame):
     '''Close the program with ^C'''
+
     print ""
     GPIO.cleanup()
     print "Close the program"
     sys.exit(0)
 
 def setup():
-    '''Inicializamos configuracion inicial'''
-    #inicialicies GPIO                                                          
+    '''Setup'''
+
+    #initialize GPIO                                                          
     GPIO.setmode(GPIO.BCM)         #set up GPIO using BCM numbering             
     GPIO.setup(motion, GPIO.IN)    #control motion sensor with GPIO 17          
     GPIO.setup(ledGreen, GPIO.OUT) #control ledGreen                            
     GPIO.setup(ledRed, GPIO.OUT)   #control ledRed                              
 
-    #incialicies Leds                                                           
-    GPIO.output(ledGreen,True)       #turn ledGreen on                          
-    GPIO.output(ledRed,True)      #turn ledRed off                              
+    #initialize Leds                                                           
+    GPIO.output(ledGreen,True)     #turn ledGreen on                          
+    GPIO.output(ledRed,True)       #turn ledRed off                              
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -59,62 +61,74 @@ def setup():
       time.sleep(1)
 
 def tiempo(tiempoCapturado):
-    '''a partir de un tiempo capturada obtenemos su hora y minutos              
-       return hora, minute'''
+    '''From a capture time, in miliseconds,                                                                      
+       get the hour and minutes'''
+       
     hour = tiempoCapturado[3]
     minute = tiempoCapturado[4]
     return hour,minute
 
 def envioMail(sendFrom,sendTo,sendSubject,sendText,hora,minuto):
-    '''Funcion que envia un mail'''
+    '''send a mail'''
 
-    # Creamos el mensaje                                                                           
+    #Body missage                                                                           
     msg = MIMEText(sendText)
 
-    # Conexión con el server                                                                       
+    #Connection with the server
     msg['Subject'] = sendSubject
     msg['From'] = sendFrom
     msg['To'] = sendTo
 
-    # Autenticamos                                                                                 
+    #Credentials                                                                                 
     mailServer = smtplib.SMTP('smtp.gmail.com',587)
     mailServer.ehlo()
     mailServer.starttls()
     mailServer.ehlo()
     mailServer.login("YourMail@gmail.com","password")
-    # Enviamos 'from' 'to'                                                                         
+    #send mail ('from', 'to')                                                                         
     mailServer.sendmail(sendFrom, sendTo, msg.as_string())
-    # Cerramos conexión                                                                            
+    #close                                                                            
     mailServer.close()
     
+def sendStream():
+    ''' send a stream from carriots plataform and send you a sms'''
+
+    data = {"protocol": "v2", "device": device, "at": timestamp, "data": dict(
+            motionSend=("ON" if lastStatus is 0 is on else "OFF"))}
+    carriots_response = client_carriots.send(data)
+    print carriots_response.read()
+    
+    
 def main():
-    '''Programa principal'''
-    #incializamos                                                                       
-                                                                                         
+    '''Main'''
+
+    #initialize the program                                                                      
     setup()
 
     global n_Moves, lastStatus
     while True:
-        #Comprobamos si se detecta movimiento                                           
+        #Are there moving???                                           
                                                                                          
         if GPIO.input(motion) == GPIO.HIGH and lastStatus == 0:
-            print "Se detecta movimeinto"
+            print "the are moving"
             lastStatus = 1
             n_Moves += 1
             GPIO.output(ledRed,True)
             GPIO.output(ledGreen,False)
             if n_Moves%5 == 0 :
+            	#if detected 5 movings, send an email
                 t_CapturaSeg = time.time()
                 t_Captura = time.localtime(t_CapturaSeg)
                 hour, minute = tiempo(t_Captura)
 		envioMail(From,To,Subject,Text,hour,minute)
                 print "Send Mail"
             elif n_Moves%17 == 0 :
-                #PREPARAR PARA ENVIAR UN SMS CON CARRIOTS                                
+                #if detected 17 movings, send a sms
+                sendStream()
                 n_Moves = 0
                 print "Send a SMS"
-      elif GPIO.input(motion) == GPIO.LOW and lastStatus == 1:
-            print "No se detecta movimiento"
+        elif GPIO.input(motion) == GPIO.LOW and lastStatus == 1:
+            print "There aren't moving"
             lastStatus = 0
             GPIO.output(ledRed,False)
             GPIO.output(ledGreen,True)
