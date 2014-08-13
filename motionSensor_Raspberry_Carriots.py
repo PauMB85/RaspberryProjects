@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-                                                          
 
 '''                                                                             
-Author: PauMB                                                                   
+uthor: PauMB                                                                   
 Program: Motion sensor, if it detec moves in the room, the firts time send      
          an email, the 20th send sms with Carriots plataform                    
 Date: 08/09/14                                                                  
